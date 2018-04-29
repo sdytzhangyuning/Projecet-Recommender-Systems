@@ -1,17 +1,18 @@
-import urllib
+import urllib.request
+import urllib.parse
 import json
 import base64
 from Crypto.Cipher import AES
 import codecs
 import re
 
-
+user_list = []
 headers = {
    "Referer": "http://music.163.com/",
    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.221 Safari/537.36 SE 2.X MetaSr 1.0",
 }
 
-url = "http://music.163.com/weapi/v1/resource/comments/R_SO_4_536624791?csrf_token="
+url = "http://music.163.com/weapi/v1/resource/comments/R_SO_4_29947420?csrf_token="
 
 
 def get_ParamsFirst(rid, offset):
@@ -54,7 +55,7 @@ def get_encSEcKey(text):
    return encSecKey
 
 
-rid = re.findall('comments/(.*?)\?',url)[0]
+rid = re.findall('comments/(.*?)\?', url)[0]
 offset = 0
 while True:
    text = "A"*16
@@ -65,11 +66,16 @@ while True:
        "encSecKey":encSEcKey
    }
 
-   temp_data = json.loads(urllib.request.urlopen(urllib.request.Request(url=url,data=urllib.parse.urlencode(formdata).encode("utf-8"),headers=headers)).read().decode("utf-8"))["comments"]
+   temp_data = json.loads(urllib.request.urlopen(urllib.request.Request(url=url, data=urllib.parse.urlencode(formdata).encode("utf-8"),headers=headers)).read().decode("utf-8"))["comments"]
    length = len(temp_data)
    for eve_data in temp_data:
-       print(eve_data)
+      user_list.append(eve_data['user']['userId'])
+      if len(user_list) is 5:
+          print(user_list)
    if length == 20:
        offset = offset + 20
    else:
        break
+
+print(user_list)
+

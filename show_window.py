@@ -1,11 +1,12 @@
 from __future__ import division
-from Tkinter import *
-import Tkinter
-import ttk
+from tkinter import *
+import tkinter.ttk
 from recommend import *
 import threading
+import time
+
 class GUI(Frame):
-    def __init__(self, master = None):
+    def __init__(self, master=None):
         Frame.__init__(self, master)
         self.pack()
         self.create()
@@ -15,7 +16,7 @@ class GUI(Frame):
     def search(self):
         musicTitle = self.musicTitle.get()
         if musicTitle == '':
-            print "Please input the music title!"
+            print("Please input the music title!")
         else:
             self.len1 = StringVar()
             self.len2 = StringVar()

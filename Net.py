@@ -1,41 +1,47 @@
-import urllib.requests
+import urllib.request
+import urllib.parse
 import json
 import os
 import base64
 import binascii
+import requests
 from Crypto.Cipher import AES
+import codecs
+import re
+
+
 class NetEaseAPI:
     def __init__(self):
         self.header = {
-            'Accept': '*/*',
-            'Accept-Encoding': 'gzip,deflate,sdch',
-            'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
-            'Connection': 'keep-alive',
-            'Content-Type': 'application/x-www-form-urlencoded',
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+            'Accept-Encoding': "gzip, deflate",
+            'Accept-Language': 'zh-CN,zh;q=0.9',
+            'Cookie': 'iuqxldmzr_=32; _ntes_nnid=727b9dc9b5580b62685677070700c748,1524245753913; _ntes_nuid=727b9dc9b5580b62685677070700c748; __utmz=94650624.1524245756.2.2.utmcsr=baidu|utmccn=(organic)|utmcmd=organic; WM_TID=Zsb%2BcibFMcB%2BruWdum5JEra6%2BreXJmKD; __utmc=94650624; abt=70; playerid=93326354; JSESSIONID-WYYY=8y%2F1icA%2BuxbR%2FryFSXaXD18%2BjgGzRV6uO%2FhKB42YNbEpyYAr7JEwATRKvcz%5CvHwcOU4BBVKsFrRE0lHckTO3dNbEqeY83CP3lVMmYVcipg1s6gEJ3OOg73oVPCdZKw83qSE3ix4K0i%5CUl5nwruZgvPbqwushRFbblDkGuko%5CZ05KSrlw%3A1524864563381; __utma=94650624.922432097.1524245756.1524666373.1524862764.8; __utmb=94650624.2.10.1524862764',
             'Host': 'music.163.com',
-            'Referer': 'http://music.163.com/search/',
-            'User-Agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'  # NOQA
+            'Proxy-Connection': 'keep-alive',
+            'Referer': 'http://music.163.com/',
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'
         }
-        self.cookies = {'appver': '1.5.2'}
+        # self.cookies = {'appver': '1.5.2'}
         self.playlist_class_dict = {}
-        self.session = requests.Session()
+        self.session = requests.Request()
     def httpRequest(self, method, action, query=None, urlencoded=None, callback=None, timeout=None):
         connection = json.loads(self.rawHttpRequest(method, action, query, urlencoded, callback, timeout))
         return connection
     def rawHttpRequest(self, method, action, query=None, urlencoded=None, callback=None, timeout=None):
         if method == 'GET':
             url = action if query is None else action + '?' + query
-            connection = self.session.get(url)
+            connection = requests.get(url)
         elif method == 'POST':
-            connection = self.session.post(action, query, self.header)
+            connection = requests.post(action, query, self.header)
         elif method == 'Login_POST':
-            connection = self.session.post(action,  query, self.header)
+            connection = requests.post(action,  query, self.header)
             self.session.cookies.save()
         connection.encoding = 'UTF-8'
         return connection.text
     def search(self, s, stype=1, offset=0, total='true', limit=1):
-        action = 'http://music.163.com/api/search/get'
+        action = 'http://music.163.com/#/search'
         data = {
             's': s,
             'type': stype,
@@ -75,7 +81,8 @@ class NetEaseAPI:
         action = 'http://music.163.com/api/v1/resource/comments/R_SO_4_{}/?rid=R_SO_4_{}&\
         offset={}&total={}&limit={}'.format(songId, songId, offset, total, limit)
         comments = self.httpRequest('GET', action)
-        return comments['hotComments']
+        print(comments)
+        return comments['comments']
     def getPlaylist(self, uid):
         text = {
             'uid': uid,
@@ -133,5 +140,7 @@ class NetEaseAPI:
             singer = ''
             for author in detail['ar']:
                 singer += author['name']+','
-            music.append({'id':detail['id'],'name':detail['name'],'singer':singer, 'playCount':musicCount[detail['id']]})
+            music.append({'id':detail['id'], 'name':detail['name'],'singer':singer, 'playCount':musicCount[detail['id']]})
         return music
+
+

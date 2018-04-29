@@ -22,4 +22,7 @@ form_data = {
 
 for eve_data in json.loads(urllib.request.urlopen(urllib.request.Request(url=url, data=urllib.parse.urlencode
     (form_data).encode("utf-8"), headers=headers)).read().decode("utf-8"))['comments']:
-    print(eve_data)
+    print(eve_data['user']['nickname'])
+    # nickname = eve_data('nickname')
+    # print(nickname)
+
